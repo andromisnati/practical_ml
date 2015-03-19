@@ -58,13 +58,12 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </div>
 
 
-<pre class="r"><code>setwd(&quot;D:/Users/dia/Downloads/practical_machine_learning&quot;)</code></pre>
 <div id="executive-summary" class="section level2">
 <h2>Executive Summary</h2>
-<p>In this report we’ll develop an algorithm to classify the way an exercise is made by using acceleromether variables as predictors. We develop two models: one based in knn and other using random forests (both models use a PCA preProcess). The accurancies are 96% and 98% respectively, with the second one being more computationaly consumming.</p>
+<p>In this report we’ll develop an algorithm to classify the way an exercise is made by using accelerometer variables as predictors. We develop two models: one based in knn and other using random forests (both models use a PCA preProcess). The accuracies are 96% and 98% respectively, with the second one being more computationally consuming.</p>
 <div id="reading-data-and-loading-libraries" class="section level3">
 <h3>Reading data and loading libraries</h3>
-<p>First we’ll read the test and training data. We have to make a validation partition from the trining data.</p>
+<p>First we’ll read the test and training data. We have to make a validation partition from the training data.</p>
 <pre class="r"><code>library(caret)
 traindata&lt;-read.csv(&quot;pml-training.csv&quot;)
 inTrain &lt;- createDataPartition( traindata$classe, p=0.7, list=FALSE);
@@ -74,11 +73,18 @@ testdata&lt;-read.csv(&quot;pml-testing.csv&quot;)</code></pre>
 <p>Now, we’ll look at the data we have read. As we don’t know how many predictors we have, we’ll first make a count of columns.</p>
 <pre class="r"><code>length(names(traindata))</code></pre>
 <pre><code>## [1] 160</code></pre>
-<p>We notice a high number of predictors, so we could use a way to reduce them. An out-of-the-hat way is to remove all the columns that have NAs and blank strings.</p>
+<p>We notice a high number of predictors, so we could use a way to reduce them.</p>
+</div>
+<div id="cleaning-data" class="section level3">
+<h3>Cleaning data</h3>
+<p>An out-of-the-hat way is to remove all the columns that have NAs and blank strings.</p>
 <pre class="r"><code>training2 &lt;- training[,  !apply( is.na(training), 2,any)]
 training2 &lt;- training2[, !apply( training2==&quot;&quot;,   2,any)]
 length(names(training2))</code></pre>
 <pre><code>## [1] 60</code></pre>
+</div>
+<div id="models-creation-accuracy" class="section level3">
+<h3>Models creation &amp; Accuracy</h3>
 <p>We have now 60 predictors, so we’ll try to use them to fit a model. We’ll start using the knn method, to determine the closest neighbors of the each prediction classes. We’ll make a preprocessing with pca.</p>
 <pre class="r"><code>model1&lt;-train(classe~.,data=training2, method = &quot;knn&quot;,preProcess=&quot;pca&quot;)</code></pre>
 <p>We’ll now use our model to predict the classes of our test data, to calculate de sample error.</p>
@@ -114,9 +120,9 @@ length(names(training2))</code></pre>
 ## Detection Rate         0.2826   0.1832   0.1696   0.1562   0.1811
 ## Detection Prevalence   0.2879   0.1871   0.1820   0.1606   0.1825
 ## Balanced Accuracy      0.9930   0.9708   0.9788   0.9740   0.9918</code></pre>
-<p>We notice an accuracy that goes between 96~98% in each class. We’ll try another method to see if we can improve it. We’ll now use a bagging method, Random Forest. We have to keep in mind that this method will be very time-consumming.</p>
+<p>We notice an accuracy that goes between 96~98% in each class (overall ~96%). We’ll try another method to see if we can improve it. We’ll now use a bagging method, Random Forest. We have to keep in mind that this method will be very time-consuming.</p>
 <pre class="r"><code>model2&lt;-train(classe~.,data=training2, method = &quot;rf&quot;,preProcess=&quot;pca&quot;)</code></pre>
-<p>We’ll evalute our model in the same way we did in our previous model.</p>
+<p>We’ll evaluate our model in the same way we did in our previous model.</p>
 <pre class="r"><code>confusionMatrix( predict( model2, validation ), validation$classe );</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
@@ -149,7 +155,7 @@ length(names(training2))</code></pre>
 ## Detection Rate         0.2831   0.1898   0.1723   0.1580   0.1830
 ## Detection Prevalence   0.2848   0.1915   0.1803   0.1597   0.1837
 ## Balanced Accuracy      0.9964   0.9893   0.9893   0.9813   0.9973</code></pre>
-<p>We notice the accuracy has improved to 98%. We’ll use this model to pass the test, but we should take notice that for only a 2% more of accurancy, a lot of computational power and time (hour and a half) was required. In a real life situation, this decision may not be possible.</p>
+<p>We notice the accuracy has improved to 98%. We’ll use this model to pass the test data, but we should take notice that for only a 2% more of accuracy, a lot of computational power and time (hour and a half) was required. In a real life situation, this decision may not be possible.</p>
 </div>
 </div>
 
